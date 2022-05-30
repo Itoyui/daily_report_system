@@ -12,8 +12,10 @@ import models.Employee;
 import models.validators.EmployeeValidator;
 import utils.EncryptUtil;
 
-//従業員テーブルの操作に関わる処理を行うクラス
-public class EmployeeService extends ServiceBase{
+/**
+ * 従業員テーブルの操作に関わる処理を行うクラス
+ */
+public class EmployeeService extends ServiceBase {
 
     /**
      * 指定されたページ数の一覧画面に表示するデータを取得し、EmployeeViewのリストで返却する
@@ -47,23 +49,24 @@ public class EmployeeService extends ServiceBase{
      * @param pepper pepper文字列
      * @return 取得データのインスタンス 取得できない場合null
      */
-    public EmployeeView findOne(String code, String plainPass, String peppr) {
+    public EmployeeView findOne(String code, String plainPass, String pepper) {
         Employee e = null;
         try {
+            //パスワードのハッシュ化
+            String pass = EncryptUtil.getPasswordEncrypt(plainPass, pepper);
 
-            String pass = EncryptUtil.getPasswordEncrypt(plainPass, peppr);
-
+            //社員番号とハッシュ化済パスワードを条件に未削除の従業員を1件取得する
             e = em.createNamedQuery(JpaConst.Q_EMP_GET_BY_CODE_AND_PASS, Employee.class)
-                    .setParameter(JpaConst.JPQL_PARM_CODE,code)
+                    .setParameter(JpaConst.JPQL_PARM_CODE, code)
                     .setParameter(JpaConst.JPQL_PARM_PASSWORD, pass)
                     .getSingleResult();
-        } catch (NoResultException ex){
 
+        } catch (NoResultException ex) {
         }
 
         return EmployeeConverter.toView(e);
-    }
 
+    }
 
     /**
      * idを条件に取得したデータをEmployeeViewのインスタンスで返却する
@@ -82,7 +85,7 @@ public class EmployeeService extends ServiceBase{
      */
     public long countByCode(String code) {
 
-      //指定した社員番号を保持する従業員の件数を取得する
+        //指定した社員番号を保持する従業員の件数を取得する
         long employees_count = (long) em.createNamedQuery(JpaConst.Q_EMP_COUNT_RESISTERED_BY_CODE, Long.class)
                 .setParameter(JpaConst.JPQL_PARM_CODE, code)
                 .getSingleResult();
@@ -97,7 +100,7 @@ public class EmployeeService extends ServiceBase{
      */
     public List<String> create(EmployeeView ev, String pepper) {
 
-      //パスワードをハッシュ化して設定
+        //パスワードをハッシュ化して設定
         String pass = EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper);
         ev.setPassword(pass);
 
@@ -106,14 +109,15 @@ public class EmployeeService extends ServiceBase{
         ev.setCreatedAt(now);
         ev.setUpdatedAt(now);
 
-      //登録内容のバリデーションを行う
-        List<String> errors = EmployeeValidator.validate(this,  ev,  true, true);
+        //登録内容のバリデーションを行う
+        List<String> errors = EmployeeValidator.validate(this, ev, true, true);
 
-      //バリデーションエラーがなければデータを登録する
+        //バリデーションエラーがなければデータを登録する
         if (errors.size() == 0) {
             create(ev);
         }
-      //エラーを返却（エラーがなければ0件の空リスト）
+
+        //エラーを返却（エラーがなければ0件の空リスト）
         return errors;
     }
 
@@ -130,7 +134,7 @@ public class EmployeeService extends ServiceBase{
 
         boolean validateCode = false;
         if (!savedEmp.getCode().equals(ev.getCode())) {
-          //社員番号を更新する場合
+            //社員番号を更新する場合
 
             //社員番号についてのバリデーションを行う
             validateCode = true;
@@ -140,11 +144,12 @@ public class EmployeeService extends ServiceBase{
 
         boolean validatePass = false;
         if (ev.getPassword() != null && !ev.getPassword().equals("")) {
-          //パスワードに入力がある場合
-          //パスワードについてのバリデーションを行う
+            //パスワードに入力がある場合
+
+            //パスワードについてのバリデーションを行う
             validatePass = true;
 
-          //変更後のパスワードをハッシュ化し設定する
+            //変更後のパスワードをハッシュ化し設定する
             savedEmp.setPassword(
                     EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper));
         }
@@ -152,20 +157,20 @@ public class EmployeeService extends ServiceBase{
         savedEmp.setName(ev.getName()); //変更後の氏名を設定する
         savedEmp.setAdminFlag(ev.getAdminFlag()); //変更後の管理者フラグを設定する
 
-      //更新日時に現在時刻を設定する
+        //更新日時に現在時刻を設定する
         LocalDateTime today = LocalDateTime.now();
         savedEmp.setUpdatedAt(today);
 
-      //更新内容についてバリデーションを行う
-        List<String> errors = EmployeeValidator.validate(this,  savedEmp, validateCode,validatePass);
+        //更新内容についてバリデーションを行う
+        List<String> errors = EmployeeValidator.validate(this, savedEmp, validateCode, validatePass);
 
         //バリデーションエラーがなければデータを更新する
         if (errors.size() == 0) {
             update(savedEmp);
         }
+
         //エラーを返却（エラーがなければ0件の空リスト）
         return errors;
-
     }
 
     /**
@@ -174,19 +179,21 @@ public class EmployeeService extends ServiceBase{
      */
     public void destroy(Integer id) {
 
-      //idを条件に登録済みの従業員情報を取得する
+        //idを条件に登録済みの従業員情報を取得する
         EmployeeView savedEmp = findOne(id);
 
-      //更新日時に現在時刻を設定する
+        //更新日時に現在時刻を設定する
         LocalDateTime today = LocalDateTime.now();
         savedEmp.setUpdatedAt(today);
 
         //論理削除フラグをたてる
         savedEmp.setDeleteFlag(JpaConst.EMP_DEL_TRUE);
 
-      //更新処理を行う
+        //更新処理を行う
         update(savedEmp);
+
     }
+
     /**
      * 社員番号とパスワードを条件に検索し、データが取得できるかどうかで認証結果を返却する
      * @param code 社員番号
@@ -202,10 +209,11 @@ public class EmployeeService extends ServiceBase{
 
             if (ev != null && ev.getId() != null) {
 
-              //データが取得できた場合、認証成功
+                //データが取得できた場合、認証成功
                 isValidEmployee = true;
             }
         }
+
         //認証結果を返却する
         return isValidEmployee;
     }
@@ -216,7 +224,7 @@ public class EmployeeService extends ServiceBase{
      * @return 取得データのインスタンス
      */
     private Employee findOneInternal(int id) {
-        Employee e = em.find(Employee.class,id);
+        Employee e = em.find(Employee.class, id);
 
         return e;
     }
@@ -231,6 +239,7 @@ public class EmployeeService extends ServiceBase{
         em.getTransaction().begin();
         em.persist(EmployeeConverter.toModel(ev));
         em.getTransaction().commit();
+
     }
 
     /**
@@ -241,7 +250,9 @@ public class EmployeeService extends ServiceBase{
 
         em.getTransaction().begin();
         Employee e = findOneInternal(ev.getId());
-        EmployeeConverter.copyViewToModel(e, ev);;
+        EmployeeConverter.copyViewToModel(e, ev);
         em.getTransaction().commit();
+
     }
+
 }
