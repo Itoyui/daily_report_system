@@ -10,7 +10,7 @@ public interface JpaConst {
     String PRESISTENCE_UNIT_NAME = "daily_report_system"; //DBUtilで使用
 
     //データ取得件数の最大値
-    int ROW_PER_PAGE = 15;
+    int ROW_PER_PAGE = 15;//1ページに表示するレコードの数
 
   //従業員テーブル
     String TABLE_EMP = "employees"; //テーブル名
