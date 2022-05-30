@@ -1,7 +1,9 @@
 package constants;
 
-    //画面の項目値等を定義するEnumクラス
-
+/**
+ * 画面の項目値等を定義するEnumクラス
+ *
+ */
 public enum AttributeConst {
 
     //フラッシュメッセージ
@@ -55,13 +57,16 @@ public enum AttributeConst {
         this.text = text;
         this.i = null;
     }
+
     private AttributeConst(final Integer i) {
         this.text = null;
         this.i = i;
     }
+
     public String getValue() {
         return this.text;
     }
+
     public Integer getIntegerValue() {
         return this.i;
     }
