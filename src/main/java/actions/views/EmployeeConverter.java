@@ -50,7 +50,7 @@ public class EmployeeConverter {
       return new EmployeeView(
               e.getId(),
               e.getCode(),
-              e,getName(),
+              e.getName(),
               e.getPassword(),
               e.getAdminFlag() == null
                       ? null

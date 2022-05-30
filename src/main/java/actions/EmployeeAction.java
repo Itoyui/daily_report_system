@@ -11,19 +11,23 @@ import constants.ForwardConst;
 import constants.JpaConst;
 import services.EmployeeService;
 
-//従業員に関わる処理を行うActionクラス
-public class EmployeeAction extends ActionBase{
+/**
+ * 従業員に関わる処理を行うActionクラス
+ *
+ */
+public class EmployeeAction extends ActionBase {
 
     private EmployeeService service;
 
-
-    //メソッドを実行する
+    /**
+     * メソッドを実行する
+     */
     @Override
-    public void process() throws ServletException,IOException {
+    public void process() throws ServletException, IOException {
 
         service = new EmployeeService();
 
-        ////メソッドを実行(ActionBaseから）
+        //メソッドを実行
         invoke();
 
         service.close();
@@ -36,16 +40,16 @@ public class EmployeeAction extends ActionBase{
      */
     public void index() throws ServletException, IOException {
 
-      //指定されたページ数の一覧画面に表示するデータを取得（ActionBase）
+        //指定されたページ数の一覧画面に表示するデータを取得
         int page = getPage();
         List<EmployeeView> employees = service.getPerPage(page);
 
-      //全ての従業員データの件数を取得
+        //全ての従業員データの件数を取得
         long employeeCount = service.countAll();
 
-        putRequestScope(AttributeConst.EMPLOYEES, employees);  //取得した従業員データ
-        putRequestScope(AttributeConst.EMP_COUNT, employeeCount);  //全ての従業員データの件数
-        putRequestScope(AttributeConst.PAGE,page); //ページ数
+        putRequestScope(AttributeConst.EMPLOYEES, employees); //取得した従業員データ
+        putRequestScope(AttributeConst.EMP_COUNT, employeeCount); //全ての従業員データの件数
+        putRequestScope(AttributeConst.PAGE, page); //ページ数
         putRequestScope(AttributeConst.MAX_ROW, JpaConst.ROW_PER_PAGE); //1ページに表示するレコードの数
 
         //セッションにフラッシュメッセージが設定されている場合はリクエストスコープに移し替え、セッションからは削除する
@@ -55,8 +59,9 @@ public class EmployeeAction extends ActionBase{
             removeSessionScope(AttributeConst.FLUSH);
         }
 
-      //一覧画面を表示
+        //一覧画面を表示
         forward(ForwardConst.FW_EMP_INDEX);
+
     }
 
 }
